@@ -1,0 +1,44 @@
+services:
+  db:
+    image: mysql
+    container_name: melp_db
+    restart: always
+    volumes:
+      - ./data/db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpass
+      - MYSQL_DATABASE=melp
+      - MYSQL_USER=melp
+      - MYSQL_PASSWORD=melp
+    networks:
+      - backend
+  web:
+    build: .
+    container_name: melp_web
+    restart: always
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    environment:
+      - MYSQL_DATABASE=melp
+      - MYSQL_USER=melp
+      - MYSQL_PASSWORD=melp
+    depends_on:
+      - db
+    networks:
+      - backend
+  adminer:
+    image: adminer
+    container_name: melp_adminer
+    restart: always
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    networks:
+      - backend
+networks:
+  backend:
+    driver: bridge
